@@ -1,0 +1,138 @@
+# BBScript
+
+BBScript is a lightweight graph runtime and CLI for executing `.bbs` documents.
+It focuses on core execution semantics (blocks, links, validation, and parallel DAG execution) without editor or API server dependencies.
+
+## Project Layout
+
+```text
+bbscript/
+  __init__.py
+  cli.py
+  core/
+    __init__.py
+    block_base.py
+    executor.py
+    events.py
+    loader.py
+    models.py
+    registry.py
+    serializer.py
+    state.py
+  blocks/
+    __init__.py
+    builtin_blocks.py
+  tests/
+    test_bbs_schema.py
+    test_bbs_executor.py
+  pyproject.toml
+  pytest.ini
+```
+
+## Requirements
+
+- Python 3.10+
+- `pip` for dependency installation
+
+## Installation
+
+From the `bbscript` directory:
+
+```bash
+python -m pip install -e .
+```
+
+For development dependencies:
+
+```bash
+python -m pip install -e .[dev]
+```
+
+## CLI Usage
+
+The project exposes the `bbscript` CLI entrypoint.
+
+### Validate
+
+```bash
+bbscript validate path/to/script.bbs
+```
+
+Validates `.bbs` schema and graph correctness.
+
+### Inspect
+
+```bash
+bbscript inspect path/to/script.bbs
+```
+
+Prints normalized graph metadata (version, kind, entry blocks, blocks, links).
+
+### Run
+
+```bash
+bbscript run path/to/script.bbs
+```
+
+Executes reachable blocks from entry points with bounded parallelism and prints final context.
+
+## Minimal `.bbs` Example
+
+```json
+{
+  "version": "2.0",
+  "kind": "bbscript",
+  "blocks": [
+    {
+      "id": "const_1",
+      "block": "const",
+      "args": { "value": 3 },
+      "output": "a"
+    },
+    {
+      "id": "const_2",
+      "block": "const",
+      "args": { "value": 4 },
+      "output": "b"
+    },
+    {
+      "id": "sum",
+      "block": "add",
+      "args": { "a": "{{ a }}", "b": "{{ b }}" },
+      "output": "result"
+    }
+  ],
+  "links": [
+    { "source": "const_1", "target": "sum" },
+    { "source": "const_2", "target": "sum" }
+  ]
+}
+```
+
+Typical flow:
+- `validate` confirms schema and graph.
+- `inspect` displays normalized blocks and links.
+- `run` returns `execution_status: completed` and includes `result: 7.0` in final context.
+
+## Testing
+
+Run tests from the `bbscript` directory:
+
+```bash
+python -m pytest -q
+```
+
+## Development Notes
+
+- Runtime semantics live in `core/`.
+- Built-in block implementations live in `blocks/`.
+- Documents are strict `.bbs` JSON with `kind = "bbscript"` and `version = "2.0"`.
+- Keep comments and documentation in English.
+- Add tests for any behavior changes, especially loader validation and executor scheduling.
+
+## Contributing
+
+1. Create a branch for your change.
+2. Add or update tests.
+3. Run `python -m pytest -q`.
+4. Keep public behavior and terminology consistent with BBScript (`block`, `link`, `.bbs`).
