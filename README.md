@@ -16,7 +16,7 @@ bbscript/
   core/
     __init__.py
     block_base.py
-    executor.py
+    runner.py
     events.py
     loader.py
     models.py
@@ -28,7 +28,7 @@ bbscript/
     builtin_blocks.py
   tests/
     test_bbs_schema.py
-    test_bbs_executor.py
+    test_bbs_runner.py
   pyproject.toml
   pytest.ini
 ```
@@ -134,7 +134,7 @@ python -m pytest -q
 - The base `Block` class does not define UI-oriented fields such as `display_name` or `category`; add them on subclasses if you need them.
 - Documents are strict `.bbs` JSON with `kind = "bbscript"` and `version = "2.0"`.
 - Keep comments and documentation in English.
-- Add tests for any behavior changes, especially loader validation and executor scheduling.
+- Add tests for any behavior changes, especially loader validation and runner scheduling.
 
 ## Contributing
 

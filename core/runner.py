@@ -1,4 +1,4 @@
-"""BBScript DAG executor with bounded parallelism and structured events."""
+"""BBScript DAG runner with bounded parallelism and structured events."""
 
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ class ExecutionResult:
     events: List[ExecutionEvent]
 
 
-def execute_bbs_document(
+def run_bbs_document(
     document: BBScriptDocument,
     *,
     execution_id: Optional[str] = None,
@@ -160,4 +160,3 @@ def execute_bbs_document(
         emit(ExecutionEvent.now("execution_completed", execution_id=execution_id, data={}))
 
     return ExecutionResult(execution_id=execution_id, context=exec_context.variables, state=state, events=events)
-

@@ -1,7 +1,7 @@
 import threading
 
 from bbscript.core.block_base import Block
-from bbscript.core.executor import execute_bbs_document
+from bbscript.core.runner import run_bbs_document
 from bbscript.core.loader import validate_bbs_document
 from bbscript.core.registry import register_block
 
@@ -31,7 +31,7 @@ def test_dag_execution_fan_in():
             "links": [{"source": "a", "target": "c"}, {"source": "b", "target": "c"}],
         }
     )
-    result = execute_bbs_document(doc, max_workers=3)
+    result = run_bbs_document(doc, max_workers=3)
     assert result.state.status.value == "completed"
     assert result.context["c_out"] == 3
 
@@ -70,7 +70,7 @@ def test_parallel_branches():
     result_holder = {}
 
     def _run():
-        result_holder["r"] = execute_bbs_document(doc, max_workers=2)
+        result_holder["r"] = run_bbs_document(doc, max_workers=2)
 
     t = threading.Thread(target=_run)
     t.start()
@@ -79,4 +79,3 @@ def test_parallel_branches():
     _release.set()
     t.join(timeout=5)
     assert result_holder["r"].state.status.value == "completed"
-

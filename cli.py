@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from bbscript.core.loader import load_bbs_document
-from bbscript.core.executor import execute_bbs_document
+from bbscript.core.runner import run_bbs_document
 from bbscript import blocks as _builtin_blocks  # noqa: F401
 
 app = typer.Typer(help="BBScript CLI.")
@@ -58,7 +58,7 @@ def run(
     """Execute a `.bbs` document."""
     p = _require_exists(path)
     doc = load_bbs_document(p)
-    result = execute_bbs_document(doc, execution_id=execution_id, max_workers=max_workers)
+    result = run_bbs_document(doc, execution_id=execution_id, max_workers=max_workers)
     typer.echo(f"execution_status: {result.state.status.value}")
     if result.state.errors.get("__execution__"):
         typer.echo(f"error: {result.state.errors['__execution__']}")
