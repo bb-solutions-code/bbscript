@@ -10,9 +10,7 @@ from bbscript.core.registry import register_block
 
 @register_block
 class ConstBlock(Block):
-    name = "const"
-    display_name = "Const"
-    category = "Utilities"
+    id = "const"
 
     def run(self, args: Dict[str, Any], context: Dict[str, Any]) -> Any:
         return args.get("value")
@@ -20,9 +18,7 @@ class ConstBlock(Block):
 
 @register_block
 class AddBlock(Block):
-    name = "add"
-    display_name = "Add"
-    category = "Math"
+    id = "add"
 
     def run(self, args: Dict[str, Any], context: Dict[str, Any]) -> Any:
         a = float(args.get("a", 0))
@@ -32,10 +28,7 @@ class AddBlock(Block):
 
 @register_block
 class TemplateBlock(Block):
-    name = "template_echo"
-    display_name = "Template Echo"
-    category = "Text"
+    id = "template_echo"
 
     def run(self, args: Dict[str, Any], context: Dict[str, Any]) -> Any:
         return args.get("text", "")
-

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List
 
 
 @dataclass(frozen=True)
@@ -23,13 +23,7 @@ class BlockOutput:
 
 
 class Block(ABC):
-    name: str
-    display_name: Optional[str] = None
-    category: str = "Utilities"
-
-    @classmethod
-    def get_display_name(cls) -> str:
-        return cls.display_name or cls.name
+    id: str
 
     @classmethod
     def arguments(cls) -> List[BlockArgument]:
@@ -45,4 +39,3 @@ class Block(ABC):
 
     def execute(self, args: Dict[str, Any], context: Dict[str, Any]) -> Any:
         return self.run(args=args, context=context)
-

@@ -8,7 +8,7 @@ from bbscript.core.registry import register_block
 
 @register_block
 class TestConst(Block):
-    name = "test_const"
+    id = "test_const"
 
     def run(self, args, context):
         return args["value"]
@@ -16,7 +16,7 @@ class TestConst(Block):
 
 @register_block
 class TestAdd(Block):
-    name = "test_add"
+    id = "test_add"
 
     def run(self, args, context):
         return context[args["a_var"]] + context[args["b_var"]]
@@ -47,7 +47,7 @@ _release = threading.Event()
 
 @register_block
 class TestWait(Block):
-    name = "test_wait"
+    id = "test_wait"
 
     def run(self, args, context):
         if args["id"] == "a":

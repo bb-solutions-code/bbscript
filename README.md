@@ -126,6 +126,8 @@ python -m pytest -q
 
 - Runtime semantics live in `core/`.
 - Built-in block implementations live in `blocks/`.
+- A Python `Block` subclass registers by a class attribute `id` that must match the document’s `"block"` string for that block type.
+- The base `Block` class does not define UI-oriented fields such as `display_name` or `category`; add them on subclasses if you need them.
 - Documents are strict `.bbs` JSON with `kind = "bbscript"` and `version = "2.0"`.
 - Keep comments and documentation in English.
 - Add tests for any behavior changes, especially loader validation and executor scheduling.
