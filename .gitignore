@@ -28,6 +28,9 @@ htmlcov/
 .idea/
 .vscode/
 
+# Deprecated app
+deprecated_unused_workflow_for_examples/
+
 # OS artifacts
 .DS_Store
 Thumbs.db
