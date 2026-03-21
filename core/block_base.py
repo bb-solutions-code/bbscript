@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, ClassVar, Dict, List
 
 
 @dataclass(frozen=True)
@@ -23,7 +23,8 @@ class BlockOutput:
 
 
 class Block(ABC):
-    id: str
+    # Block type key (matches `block` in .bbs); set via @register_block("...") or legacy `id = "..."`.
+    id: ClassVar[str] = ""
 
     @classmethod
     def arguments(cls) -> List[BlockArgument]:

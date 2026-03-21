@@ -6,18 +6,14 @@ from bbscript.core.loader import validate_bbs_document
 from bbscript.core.registry import register_block
 
 
-@register_block
+@register_block("test_const")
 class TestConst(Block):
-    id = "test_const"
-
     def run(self, args, context):
         return args["value"]
 
 
-@register_block
+@register_block("test_add")
 class TestAdd(Block):
-    id = "test_add"
-
     def run(self, args, context):
         return context[args["a_var"]] + context[args["b_var"]]
 
@@ -45,10 +41,8 @@ _started_b = threading.Event()
 _release = threading.Event()
 
 
-@register_block
+@register_block("test_wait")
 class TestWait(Block):
-    id = "test_wait"
-
     def run(self, args, context):
         if args["id"] == "a":
             _started_a.set()

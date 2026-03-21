@@ -126,7 +126,7 @@ python -m pytest -q
 
 - Runtime semantics live in `core/`.
 - Built-in block implementations live in `blocks/`.
-- A Python `Block` subclass registers by a class attribute `id` that must match the document’s `"block"` string for that block type.
+- A Python `Block` subclass registers with `@register_block("<block_type>")`, where `<block_type>` matches the document’s `"block"` string for that block type. Alternatively, you can use `@register_block` with no arguments and set a class attribute `id` (legacy style).
 - The base `Block` class does not define UI-oriented fields such as `display_name` or `category`; add them on subclasses if you need them.
 - Documents are strict `.bbs` JSON with `kind = "bbscript"` and `version = "2.0"`.
 - Keep comments and documentation in English.

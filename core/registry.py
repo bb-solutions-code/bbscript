@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, Type
+from typing import Callable, Dict, Type, Union, overload
 
 from .block_base import Block
 
@@ -27,9 +27,25 @@ class BlockRegistry:
         return self._registry[block_id]
 
 
-def register_block(block_cls: Type[Block]) -> Type[Block]:
-    BlockRegistry().register(block_cls)
-    return block_cls
+@overload
+def register_block(block_id: str) -> Callable[[Type[Block]], Type[Block]]: ...
+
+
+@overload
+def register_block(block_cls: Type[Block]) -> Type[Block]: ...
+
+
+def register_block(
+    block_id_or_cls: Union[str, Type[Block]],
+) -> Union[Type[Block], Callable[[Type[Block]], Type[Block]]]:
+    if isinstance(block_id_or_cls, str):
+
+        def decorator(cls: Type[Block]) -> Type[Block]:
+            setattr(cls, "id", block_id_or_cls)
+            return BlockRegistry().register(cls)
+
+        return decorator
+    return BlockRegistry().register(block_id_or_cls)
 
 
 def get_block(block_id: str) -> Type[Block]:
