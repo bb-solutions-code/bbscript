@@ -1,4 +1,4 @@
-<p align="left">
+<p align="center">
   <img src="Assets/logo.svg" alt="BBScript logo" width="160" height="160" />
 </p>
 
