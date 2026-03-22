@@ -36,6 +36,8 @@ bbscript/
     test_bbs_runner.py
   pyproject.toml
   pytest.ini
+  setup_dev.ps1
+  setup_dev.sh
 ```
 
 ## Requirements
@@ -56,6 +58,34 @@ For development dependencies:
 ```bash
 python -m pip install -e .[dev]
 ```
+
+### Development environment (venv, bbscript + bbpm)
+
+To create a local `.venv`, install this package in editable mode, and install **[bbpm](https://github.com/bb-solutions-code/bbpm)** when a checkout exists next to this repo (`../bbpm`) or under `bbscript/bbpm`, use one of:
+
+**Windows (PowerShell)** — from the `bbscript` directory:
+
+```powershell
+.\setup_dev.ps1
+```
+
+Optional: `.\setup_dev.ps1 -NoDev` to skip optional `dev` dependencies for both packages.
+
+**Linux / macOS** — from the `bbscript` directory:
+
+```bash
+chmod +x setup_dev.sh
+./setup_dev.sh
+```
+
+Optional: `./setup_dev.sh --no-dev`, or `SETUP_DEV_NO_DEV=1 ./setup_dev.sh`.
+
+If no local `bbpm` tree is found, the script installs `bbpm` from PyPI (which also pulls a release build of `bbscript` as a dependency; for working on both codebases side by side, clone `bbpm` next to this repository).
+
+Activate the venv before running the CLIs:
+
+- Windows: `.\.venv\Scripts\Activate.ps1`
+- Unix: `source .venv/bin/activate`
 
 ## CLI Usage
 
