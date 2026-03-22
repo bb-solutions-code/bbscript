@@ -7,6 +7,11 @@
 BBScript is a lightweight graph runtime and CLI for executing `.bbs` documents.
 It focuses on core execution semantics (blocks, links, validation, and parallel DAG execution) without editor or API server dependencies.
 
+## Related projects
+
+- **[bbpm](https://github.com/bb-solutions-code/bbpm)** (BBScript Package Manager) — installs third-party `.bbpackage` repos and runs `.bbs` files with `bbpm run` so package blocks register alongside built-ins.
+- **[foblox](https://github.com/bb-solutions-code/foblox)** — foundation blocks (`variable`, `calculate`, `say`, …); the minimal example below uses these block types when Foblox is available via bbpm or a local package path.
+
 ## Project Layout
 
 ```text
