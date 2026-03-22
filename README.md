@@ -88,21 +88,21 @@ Executes reachable blocks from entry points with bounded parallelism and prints 
   "kind": "bbscript",
   "blocks": [
     {
-      "id": "const_1",
-      "block": "const",
+      "id": "num_1",
+      "block": "variable",
       "args": { "value": 3 },
       "output": "a"
     },
     {
-      "id": "const_2",
-      "block": "const",
+      "id": "num_2",
+      "block": "variable",
       "args": { "value": 4 },
       "output": "b"
     },
     {
       "id": "sum",
-      "block": "add",
-      "args": { "a": "{{ a }}", "b": "{{ b }}" },
+      "block": "calculate",
+      "args": { "a": "{{ a }}", "b": "{{ b }}", "operation": "+" },
       "output": "result"
     }
   ],
