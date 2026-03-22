@@ -1,0 +1,5 @@
+.venv-build/
+pyinstaller/build/
+pyinstaller/dist/
+BUNDLED_FOBLOX_REF
+windows/dist/

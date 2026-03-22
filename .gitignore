@@ -16,6 +16,11 @@ env/
 # Build and packaging artifacts
 build/
 dist/
+packaging/.venv-build/
+packaging/pyinstaller/build/
+packaging/pyinstaller/dist/
+packaging/BUNDLED_FOBLOX_REF
+packaging/windows/dist/
 *.egg-info/
 .eggs/
 

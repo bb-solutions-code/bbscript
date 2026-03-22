@@ -9,8 +9,8 @@ It focuses on core execution semantics (blocks, links, validation, and parallel 
 
 ## Related projects
 
-- **[bbpm](https://github.com/bb-solutions-code/bbpm)** (BBScript Package Manager) — installs third-party `.bbpackage` repos and runs `.bbs` files with `bbpm run` so package blocks register alongside built-ins.
-- **[foblox](https://github.com/bb-solutions-code/foblox)** — foundation blocks (`variable`, `calculate`, `say`, …); the minimal example below uses these block types when Foblox is available via bbpm or a local package path.
+- **[bbpm](https://github.com/bb-solutions-code/bbpm)** (BBScript Package Manager) — installs third-party `.bbpackage` repos under `.bbpm/`; with `bbpm` installed, `bbscript run` loads those packages alongside built-ins and any bundled foundation.
+- **[foblox](https://github.com/bb-solutions-code/foblox)** — foundation blocks (`variable`, `calculate`, `say`, …); the minimal example below uses these block types when Foblox is available (bundled path, `BBSCRIPT_BUNDLED_PACKAGES`, or a project installed via bbpm).
 
 ## Project Layout
 
@@ -81,9 +81,12 @@ Prints normalized graph metadata (version, kind, entry blocks, blocks, links).
 
 ```bash
 bbscript run path/to/script.bbs
+bbscript run path/to/script.bbs --path /path/to/project
 ```
 
 Executes reachable blocks from entry points with bounded parallelism and prints final context.
+
+`bbscript run` always loads built-in blocks and, when present, bundled foundation from a frozen app layout or **`BBSCRIPT_BUNDLED_PACKAGES`**. If **[bbpm](https://github.com/bb-solutions-code/bbpm)** is installed, packages under `.bbpm/` are loaded too; if not, a short notice is printed to stderr and `.bbpm` packages are skipped.
 
 ## Minimal `.bbs` Example
 
@@ -140,6 +143,10 @@ python -m pytest -q
 - Documents are strict `.bbs` JSON with `kind = "bbscript"` and `version = "2.0"`.
 - Keep comments and documentation in English.
 - Add tests for any behavior changes, especially loader validation and runner scheduling.
+
+## Packaging
+
+Frozen CLI bundles (`bbscript` + `bbpm` + embedded Foblox) and installers are documented in [`packaging/README.md`](packaging/README.md).
 
 ## Contributing
 
