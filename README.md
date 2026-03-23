@@ -10,7 +10,7 @@ It focuses on core execution semantics (blocks, links, validation, and parallel 
 ## Related projects
 
 - **[bbpm](https://github.com/bb-solutions-code/bbpm)** (BBScript Package Manager) — installs third-party `.bbpackage` repos under `.bbpm/`; with `bbpm` installed, `bbscript run` loads those packages alongside built-ins and any bundled foundation.
-- **[foblox](https://github.com/bb-solutions-code/foblox)** — foundation blocks (`variable`, `calculate`, `say`, …); the minimal example below uses these block types when Foblox is available (bundled path, `BBSCRIPT_BUNDLED_PACKAGES`, or a project installed via bbpm).
+- **[foblox](https://github.com/bb-solutions-code/foblox)** — foundation blocks (`variable`, `calculate`, `say`, `if`, `switch`, …); the minimal example below uses these block types when Foblox is available (bundled path, `BBSCRIPT_BUNDLED_PACKAGES`, or a project installed via bbpm).
 
 ## Project Layout
 
@@ -145,8 +145,8 @@ Executes reachable blocks from entry points with bounded parallelism and prints 
     }
   ],
   "links": [
-    { "source": "const_1", "target": "sum" },
-    { "source": "const_2", "target": "sum" }
+    { "source": "num_1", "target": "sum" },
+    { "source": "num_2", "target": "sum" }
   ]
 }
 ```
@@ -155,6 +155,61 @@ Typical flow:
 - `validate` confirms schema and graph.
 - `inspect` displays normalized blocks and links.
 - `run` returns `execution_status: completed` and includes `result: 7.0` in final context.
+
+## Control-flow links (`if` / `switch`)
+
+`links` now support optional control-flow fields:
+
+- `link_type`: `"data"` (default) or `"control"`.
+- `case`: scalar case value used for control routing.
+- `default`: fallback control branch when no `case` matches.
+
+Rules:
+
+- `case` and `default` are only valid on `link_type: "control"`.
+- Control links are only valid from `if` and `switch` blocks.
+- For `if`, `case` must be boolean (`true` or `false`).
+- Only one branch is executed for control-flow; non-selected branches are marked `skipped`.
+
+### `if` branching example
+
+```json
+{
+  "version": "2.0",
+  "kind": "bbscript",
+  "blocks": [
+    { "id": "is_pro", "block": "if", "args": { "condition": "{{ plan == 'pro' }}" }, "output": "cond" },
+    { "id": "then_say", "block": "say", "args": { "input": "PRO FLOW" }, "output": "then_out" },
+    { "id": "else_say", "block": "say", "args": { "input": "FREE FLOW" }, "output": "else_out" }
+  ],
+  "links": [
+    { "source": "is_pro", "target": "then_say", "link_type": "control", "case": true },
+    { "source": "is_pro", "target": "else_say", "link_type": "control", "case": false }
+  ]
+}
+```
+
+### `switch` branching example
+
+```json
+{
+  "version": "2.0",
+  "kind": "bbscript",
+  "blocks": [
+    { "id": "selector", "block": "variable", "args": { "value": "pro" }, "output": "plan" },
+    { "id": "choose_plan", "block": "switch", "args": { "value": "{{ plan }}" }, "output": "selected" },
+    { "id": "pro_path", "block": "say", "args": { "input": "PRO PATH" }, "output": "pro_out" },
+    { "id": "free_path", "block": "say", "args": { "input": "FREE PATH" }, "output": "free_out" },
+    { "id": "default_path", "block": "say", "args": { "input": "DEFAULT PATH" }, "output": "default_out" }
+  ],
+  "links": [
+    { "source": "selector", "target": "choose_plan" },
+    { "source": "choose_plan", "target": "pro_path", "link_type": "control", "case": "pro" },
+    { "source": "choose_plan", "target": "free_path", "link_type": "control", "case": "free" },
+    { "source": "choose_plan", "target": "default_path", "link_type": "control", "default": true }
+  ]
+}
+```
 
 ## Testing
 

@@ -52,7 +52,15 @@ def inspect(path: str) -> None:
     typer.echo("")
     typer.echo("links:")
     for l in doc.links:
-        typer.echo(f"- {l.source} -> {l.target}")
+        suffix = ""
+        if l.link_type == "control":
+            parts = ["type=control"]
+            if l.case is not None:
+                parts.append(f"case={l.case!r}")
+            if l.default:
+                parts.append("default=true")
+            suffix = f" ({', '.join(parts)})"
+        typer.echo(f"- {l.source} -> {l.target}{suffix}")
 
 
 @app.command()

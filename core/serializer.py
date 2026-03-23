@@ -10,6 +10,16 @@ from .models import BBScriptDocument
 
 
 def to_bbs_json(document: BBScriptDocument) -> Dict[str, object]:
+    links = []
+    for l in document.links:
+        item: Dict[str, object] = {"source": l.source, "target": l.target}
+        if l.link_type != "data":
+            item["link_type"] = l.link_type
+        if l.case is not None:
+            item["case"] = l.case
+        if l.default:
+            item["default"] = True
+        links.append(item)
     return {
         "version": document.version,
         "kind": document.kind,
@@ -17,7 +27,7 @@ def to_bbs_json(document: BBScriptDocument) -> Dict[str, object]:
         "blocks": [
             {"id": b.id, "block": b.block, "args": b.args, "output": b.output} for b in document.blocks
         ],
-        "links": [{"source": l.source, "target": l.target} for l in document.links],
+        "links": links,
     }
 
 

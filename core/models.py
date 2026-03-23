@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 
 @dataclass(frozen=True)
@@ -18,6 +18,9 @@ class BlockInstance:
 class Link:
     source: str
     target: str
+    link_type: Literal["data", "control"] = "data"
+    case: Optional[Any] = None
+    default: bool = False
 
 
 @dataclass(frozen=True)

@@ -13,6 +13,7 @@ class BlockExecutionStatus(str, Enum):
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
+    SKIPPED = "skipped"
 
 
 class ExecutionStatus(str, Enum):
@@ -64,6 +65,16 @@ class ExecutionState:
         with self._lock:
             self.results[block_result.block_id] = block_result
             self.block_statuses[block_result.block_id] = BlockExecutionStatus.COMPLETED
+
+    def set_block_skipped(self, block_id: str) -> None:
+        with self._lock:
+            # Preserve terminal statuses for already processed blocks.
+            if self.block_statuses.get(block_id) in {
+                BlockExecutionStatus.COMPLETED,
+                BlockExecutionStatus.FAILED,
+            }:
+                return
+            self.block_statuses[block_id] = BlockExecutionStatus.SKIPPED
 
     def set_failed(self, error_message: str) -> None:
         with self._lock:

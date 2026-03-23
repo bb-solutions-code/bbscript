@@ -12,7 +12,7 @@ from jinja2 import Template, UndefinedError
 from .block_base import Block
 from .events import EventSink, ExecutionEvent
 from .loader import BBScriptValidationError
-from .models import BBScriptDocument
+from .models import BBScriptDocument, Link
 from .registry import get_block
 from .state import BlockExecutionStatus, BlockResult, ExecutionContext, ExecutionState, ExecutionStatus
 
@@ -56,10 +56,16 @@ def run_bbs_document(
     block_by_id = {b.id: b for b in document.blocks}
     reachable: Set[str] = set()
     outgoing: Dict[str, Set[str]] = {bid: set() for bid in block_by_id.keys()}
+    outgoing_data_links: Dict[str, List[str]] = {bid: [] for bid in block_by_id.keys()}
+    outgoing_control_links: Dict[str, List[Link]] = {bid: [] for bid in block_by_id.keys()}
     incoming_sources: Dict[str, Set[str]] = {bid: set() for bid in block_by_id.keys()}
     for l in document.links:
         outgoing[l.source].add(l.target)
         incoming_sources[l.target].add(l.source)
+        if l.link_type == "control":
+            outgoing_control_links[l.source].append(l)
+        else:
+            outgoing_data_links[l.source].append(l.target)
 
     queue = list(document.entry_blocks or [])
     reachable.update(queue)
@@ -74,11 +80,9 @@ def run_bbs_document(
 
     entry_set = set(document.entry_blocks or [])
     remaining_deps: Dict[str, int] = {}
-    dependents: Dict[str, Set[str]] = {bid: set() for bid in reachable}
     for bid in reachable:
         deps_in_reachable = incoming_sources.get(bid, set()) & reachable
         remaining_deps[bid] = len(deps_in_reachable)
-        dependents[bid] = outgoing.get(bid, set()) & reachable
     for bid in entry_set & reachable:
         remaining_deps[bid] = 0
 
@@ -112,6 +116,27 @@ def run_bbs_document(
     running: Dict[Future[BlockResult], str] = {}
     stop_scheduling = False
 
+    def schedule_block_if_ready(dep_id: str, pool: ThreadPoolExecutor) -> None:
+        if dep_id not in reachable:
+            return
+        if state.block_statuses.get(dep_id) == BlockExecutionStatus.SKIPPED:
+            return
+        remaining_deps[dep_id] -= 1
+        if remaining_deps[dep_id] != 0:
+            return
+        with started_lock:
+            if dep_id in started:
+                return
+            started.add(dep_id)
+        state.set_block_status(dep_id, BlockExecutionStatus.RUNNING)
+        emit(ExecutionEvent.now("block_started", execution_id=execution_id, block_id=dep_id, data={}))
+        running[pool.submit(run_block, dep_id)] = dep_id
+
+    def mark_pending_as_skipped() -> None:
+        for block_id, status in list(state.block_statuses.items()):
+            if status == BlockExecutionStatus.PENDING:
+                state.set_block_skipped(block_id)
+
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         for bid in [bid for bid in reachable if remaining_deps[bid] == 0]:
             with started_lock:
@@ -140,22 +165,34 @@ def run_bbs_document(
                 emit(ExecutionEvent.now("block_completed", execution_id=execution_id, block_id=bid, data={"output": block_result.output}))
                 if stop_scheduling:
                     continue
-                for dep_id in dependents.get(bid, set()):
-                    if dep_id not in reachable:
+                for dep_id in outgoing_data_links.get(bid, []):
+                    schedule_block_if_ready(dep_id, pool)
+
+                control_links = outgoing_control_links.get(bid, [])
+                if control_links:
+                    selected = [l for l in control_links if l.case is not None and l.case == block_result.value]
+                    if not selected:
+                        selected = [l for l in control_links if l.default]
+                    if not selected:
+                        err_msg = (
+                            f"No control branch matched for block '{bid}' with value "
+                            f"{block_result.value!r} and no default branch."
+                        )
+                        state.set_failed(err_msg)
+                        stop_scheduling = True
                         continue
-                    remaining_deps[dep_id] -= 1
-                    if remaining_deps[dep_id] == 0:
-                        with started_lock:
-                            if dep_id in started:
-                                continue
-                            started.add(dep_id)
-                        state.set_block_status(dep_id, BlockExecutionStatus.RUNNING)
-                        emit(ExecutionEvent.now("block_started", execution_id=execution_id, block_id=dep_id, data={}))
-                        running[pool.submit(run_block, dep_id)] = dep_id
+                    selected_targets = {l.target for l in selected}
+                    for l in control_links:
+                        if l.target in selected_targets:
+                            schedule_block_if_ready(l.target, pool)
+                        else:
+                            state.set_block_skipped(l.target)
 
     if state.status == ExecutionStatus.FAILED:
+        mark_pending_as_skipped()
         emit(ExecutionEvent.now("execution_failed", execution_id=execution_id, data=state.errors))
     else:
+        mark_pending_as_skipped()
         state.status = ExecutionStatus.COMPLETED
         emit(ExecutionEvent.now("execution_completed", execution_id=execution_id, data={}))
 
